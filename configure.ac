@@ -1,13 +1,6 @@
 AC_PREREQ(2.63)
 
-# Version number. This is currently the only place.
-m4_define([HIDAPI_MAJOR],   0)
-m4_define([HIDAPI_MINOR],   9)
-m4_define([HIDAPI_RELEASE], 0)
-m4_define([HIDAPI_RC],       )
-m4_define([VERSION_STRING], HIDAPI_MAJOR[.]HIDAPI_MINOR[.]HIDAPI_RELEASE[]HIDAPI_RC)
-
-AC_INIT([hidapi],[VERSION_STRING],[alan@signal11.us])
+AC_INIT([hidapi],[m4_normalize(m4_builtin([include], VERSION))],[https://github.com/libusb/hidapi/issues])
 
 # Library soname version
 # Follow the following rules (particularly the ones in the second link):
@@ -20,7 +13,6 @@ LTLDFLAGS="-version-info ${lt_current}:${lt_revision}:${lt_age}"
 
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
-AC_CONFIG_MACRO_DIR([m4])
 
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT
@@ -79,7 +71,7 @@ case $host in
 	backend="mac"
 	os="darwin"
 	threads="pthreads"
-	LIBS="${LIBS} -framework IOKit -framework CoreFoundation"
+	LIBS="${LIBS} -framework IOKit -framework CoreFoundation -framework AppKit"
 	;;
 *-freebsd*)
 	AC_MSG_RESULT([ (FreeBSD back-end)])
@@ -124,6 +116,13 @@ case $host in
 	;;
 *-mingw*)
 	AC_MSG_RESULT([ (Windows back-end, using MinGW)])
+	backend="windows"
+	os="windows"
+	threads="windows"
+	win_implementation="mingw"
+	;;
+*-msys*)
+	AC_MSG_RESULT([ (Windows back-end, using MSYS2)])
 	backend="windows"
 	os="windows"
 	threads="windows"
@@ -190,7 +189,7 @@ mkdir testgui/TestGUI.app/Contents/MacOS/
 
 if test "x$testgui_enabled" != "xno"; then
 	if test "x$os" = xdarwin; then
-		# On Mac OS, don't use pkg-config.
+		# On Mac OS, do not use pkg-config.
 		AC_CHECK_PROG([foxconfig], [fox-config], [fox-config], false)
 		if test "x$foxconfig" = "xfalse"; then
 			hidapi_prog_error fox-config "FOX Toolkit"
